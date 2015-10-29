@@ -1,0 +1,147 @@
+Stateful Session Beans has few additional life cycle states compared to Stateless Session Bean. First is the passivation where an unused object gets serialized and stored into a persistant storage which could be anything since it is not defined by the JEE specification. 
+Second is the activation which deserializes the passivated object and makes the bean object usable. These happen due to the very fact that stateful session beans if not properly used could be performance hampering. If users leave their sessions unused the bean is first passivated and if not activated after a prescribed time it gets removed automatically. Additionally a call to the method annotated @Remove would also drive the bean into the destroyed state. Activation and passivation exposes life cycle methods via the @PostActivate and @PrePassivate methods.   
+[code language="java"]
+/**
+ * 
+ * @author achuth
+ * 
+ *         A method call that actually happen remotely looks no different from
+ *         called locally as far as a client is concerned. This is attained by
+ *         virtue of Proxying. The client actually makes a call to the proxy of
+ *         the service at the client side which knows how to invoke the remote
+ *         proxy after serializing and deserializing the parameters that
+ *         represent the method. Later the server side proxy calls the business
+ *         method. The service and the client code is all we write and what is
+ *         relevant to the business without the slightest concern of how
+ *         communication happens. Same is the case with other concerns such as
+ *         security and transaction.
+ */
+@Remote
+public interface ShoppingCartService {
+	public void addItem(Item item);
+
+	public List<Item> showItems();
+
+	public void endSession();
+}
+[/code]
+
+Bean class which provides the Service Implementation. 
+[code language="java"]
+@Stateful
+public class ShoppingCardServiceImpl implements ShoppingCartService {
+	List<Item> items = new ArrayList<Item>();
+
+	public void addItem(Item item) {
+		items.add(item);
+	}
+
+	public List<Item> showItems() {
+		return items;
+	}
+
+	// Life Cycle Methods
+	/**
+	 * This method is the next method in the Service which gets called after the
+	 * constructor. This is an ejb life cycle method and has meaning only within
+	 * the ejb container though it could avoid any invasion by the framework.
+	 * 
+	 * Thus unlike the previous versions of ejbs these life cycle method managed
+	 * by the container can be used outside the container, eg in case of unit
+	 * testing.
+	 */
+	@PostConstruct
+	public void init() {
+		System.out.println("Initialization Code goes here");
+	}
+
+	/**
+	 * This method like the init method gets called only once just before
+	 * destruction of the bean. These two life cycle methods are also there in
+	 * case of stateless methods.
+	 */
+	@PreDestroy
+	public void destroy() {
+		System.out.println("Pre Destruction code goes here");
+	}
+
+	/**
+	 * In order to compensate for any memory problems that could arise out of a
+	 * stateful session bean, for its nature of maintaing one instance per
+	 * client to achieve statefulness 2 additional deviation from the stateless
+	 * session bean is required for the stateful session bean.
+	 * 
+	 * While Passivation is a process of converting object to byte array stream
+	 * inorder to persist it into a persitence store such as file or a database,
+	 * activation is where the bean gets de serialized back and reconstructed to
+	 * be servicing the requests.
+	 * 
+	 * If a bean is not activated after a while of passivation it becomes
+	 * eligible for destroying. The destructor life cycle method is called
+	 * before destroying it.
+	 */
+	@PostActivate
+	public void activate() {
+		System.out.println("Activating Bean Back...");
+	}
+
+	@PrePersist
+	public void passivate() {
+		System.out.println("Passivating Bean...");
+	}
+
+	/**
+	 * Calling this life cycle method will destroy it soon after the execution
+	 * of the method. For stateful session bean this is the last resort for the
+	 * container to understand the bean is no longer required to destroy it.
+	 * Another way it gets called is after the passivation process as mentioned
+	 * above.
+	 */
+	@Remove
+	public void endSession() {
+		System.out.println("Ending Session...");
+	}
+}
+[/code]
+Once built and deployed into JBoss consult the console to get the inkling of the lookup information as follows.
+[code]
+	java:global/EJB/SuperMarketCustomerServiceImpl!org.company.project.ejb.stateless.supermarket.SuperMarketCustomerService
+	java:app/EJB/SuperMarketCustomerServiceImpl!org.company.project.ejb.stateless.supermarket.SuperMarketCustomerService
+	java:module/SuperMarketCustomerServiceImpl!org.company.project.ejb.stateless.supermarket.SuperMarketCustomerService
+	java:jboss/exported/EJB/SuperMarketCustomerServiceImpl!org.company.project.ejb.stateless.supermarket.SuperMarketCustomerService
+	java:global/EJB/SuperMarketCustomerServiceImpl
+	java:app/EJB/SuperMarketCustomerServiceImpl
+	java:module/SuperMarketCustomerServiceImpl
+[/code]
+
+Test Case Methods
+[code language="java"]
+public class CartTester extends TestCase {
+	ShoppingCartService service = null;
+
+	public void setUp() {
+		try {
+			service = LookupUtility
+					.lookup(ShoppingCartService.class,
+							"ejb:/EJB/ShoppingCardServiceImpl!org.company.project.ejb.stateful.supermarket.ShoppingCartService?stateful");
+		} catch (NamingException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void testAddItem() {
+		service.addItem(new Item("Soap", 3.4F));
+		System.out.println(service.showItems());
+		service.addItem(new Item("Soap", 3.4F));
+		System.out.println(service.showItems());
+	}
+
+	/**
+	 * Lookup has created a new Stateful instance. This time the perviously
+	 * added items wont be available anymore.
+	 */
+	public void testItems() {
+		System.out.println(service.showItems());
+	}
+}
+[/code]

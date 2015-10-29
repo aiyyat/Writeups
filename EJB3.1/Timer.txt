@@ -1,0 +1,68 @@
+Timer is another feature which EJB provides. Though basic it almost serves all use cases a Timer could possibly provide. Though one could use a tool such as Quartz it doesn't comply by standards such as that those followed by EJB Timers. All JEE compliant Application Servers or EJB providers would have to provide the Timer features. This means that Companies could be better reliant on such APIs.
+TimerServices are injected by virtue of @Resource annotation. Timers work with Stateless Session Bean.The serializable object is wrapped around in a Timer object before injected in the method annotated @Timeout.
+
+Service Class
+[code language="java"]
+@Stateless
+public class AnnouncementMakerServiceImpl implements AnnouncementMakerService {
+	@Resource
+	TimerService service;
+
+	public void startDay() {
+		service.createTimer(5000, 1000, new String[] {
+				"All Soaps have 20% discount",
+				"Buy any brown Chocolate and get another free",
+				"Shop for $100 and get $10 worth goods free" });
+	}
+
+	@Timeout
+	public void startAnnouncement(Timer timer) {
+		String[] announcements = ((String[]) timer.getInfo());
+		System.out
+				.println(announcements[((int) (Math.random() * announcements.length))]);
+	}
+}
+[/code]
+On deployment one can see the following lines in the JBoss console.
+[code]
+	java:global/EJB/AnnouncementMakerServiceImpl!org.company.project.ejb.timer.AnnouncementMakerService
+	java:app/EJB/AnnouncementMakerServiceImpl!org.company.project.ejb.timer.AnnouncementMakerService
+	java:module/AnnouncementMakerServiceImpl!org.company.project.ejb.timer.AnnouncementMakerService
+	java:jboss/exported/EJB/AnnouncementMakerServiceImpl!org.company.project.ejb.timer.AnnouncementMakerService
+	java:global/EJB/AnnouncementMakerServiceImpl
+	java:app/EJB/AnnouncementMakerServiceImpl
+	java:module/AnnouncementMakerServiceImpl
+[/code]
+Tester Class
+[code language="java"]
+public class AnnouncementTester extends TestCase {
+
+	AnnouncementMakerService service = null;
+
+	public void setUp() {
+		try {
+			service = LookupUtility
+					.lookup(AnnouncementMakerService.class,
+							"ejb:/EJB/AnnouncementMakerServiceImpl!org.company.project.ejb.timer.AnnouncementMakerService");
+		} catch (NamingException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Lookup has created a new Stateful instance. This time the perviously
+	 * added items wont be available anymore.
+	 */
+	public void testItems() {
+		service.startDay();
+	}
+
+}
+[/code]
+Output
+[code]
+22:03:32,846 INFO  [stdout] (EJB default - 3) Shop for $100 and get $10 worth goods free
+22:03:33,834 INFO  [stdout] (EJB default - 4) Shop for $100 and get $10 worth goods free
+22:03:34,843 INFO  [stdout] (EJB default - 5) All Soaps have 20% discount
+22:03:35,829 INFO  [stdout] (EJB default - 6) Buy any brown Chocolate and get another free
+[/code]

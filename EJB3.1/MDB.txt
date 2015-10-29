@@ -1,0 +1,100 @@
+EJB Specification also defines provisions for Messaging in the name of Message Driven Beans. Message driven beans are Message Consumers which are annotated @MessageDriven. An ActivationConfigProperty array provides it with key value pairs that provides the bean with properties that it needs to function. Message Selector text is one such an example. As we already know there are 3 models of Messaging. 
+1) Point to Point (p2p)
+2) Publish Subscribe 
+3) Request Reply.
+Request reply is not really an entirely different model though, since it just uses the queue/temporary queue that the sender creates and sends in the message under the header jmsReplyTo for the consumer to post back the response. Publish subscribe as we already know is one where the Message Oriented Middleware delivers it to any subscriber those have registered with it to subscribe to this destination also called a Topic. Then there are those durable subscribers who are stubborn about receiving the messages. The MOM doesn't destroy the message unitl all the consumers have confirmed they have properly consumed the messages be it that the subscribers are not even running.  
+Point to point is it simplest form where there exists only one producer and one consumer.
+Messaging concepts just dont ent there, since there are the persistant messages that possess the property that they messages are persisted into a database or filesystem until they are properly delivered and acknowledged by the consumer.
+So while using EJB, it gives the privilage of messaging just using the annotation.
+JBoss like most JEE complaint App Servers provides a messaging server by default. It goes by the name HornetQ.
+
+Following is the MDB code. The interface Message Listener provides an onMessage Method which is defined by JMS. Alternatly one can define it inside the property name under @MessageDriven(.....,messageListenerInterface="javax.jms.MessageListener",..........)
+This allows one to avoid code litering or having to bind oneself to a perticular framework such as JMS in our case which few consider is not a good practise. 
+
+Finally messages consists of 3 parts Header, Properties and Body. Header is what the JMS providers use to define their specific properties. Reserved header keywords such as JMSMessageId,JMSCorrelationID, JMSReplyTo are used to define a message. For example the Correlation ID is going to be used for finding out which response message correlates or corresponds to the messageId of the message that was sent to the reciever.
+Properties can used to define any custom properties such as a message selector text. This usually goes into out Activation Config Property in our case.
+Messages are 5 types: String or Text, Byte Array, Object, Stream, Map. We have used a Serializable Item array in the below mentioned code.
+ 
+[code language="java"]
+@MessageDriven(activationConfig = {
+		@ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
+		@ActivationConfigProperty(propertyName = "destination", propertyValue = "java:/jms/queue/InventoryQueue") })
+public class InventoryUpdationBean implements MessageListener {
+	public void onMessage(Message message) {
+		if (message instanceof ObjectMessage) {
+			try {
+				@SuppressWarnings("unchecked")
+				Item[] items = ((Item[]) ((ObjectMessage) message).getObject());
+				for (Item item : items) { 
+					System.out.println("Received Item:" + item);
+				}
+			} catch (JMSException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+}
+[/code]
+exerpt from the JBoss standalone-full.xml. Note to start up using the ./standalone.sh -c standalone-full.xml
+[code language="xml"]
+<jms-destinations>
+	<jms-queue name="ExpiryQueue">
+		<entry name="java:/jms/queue/ExpiryQueue" />
+	</jms-queue>
+	<jms-queue name="DLQ">
+		<entry name="java:/jms/queue/DLQ" />
+	</jms-queue>
+	<!-- Inventory Queue which we will use to send messages -->
+	<jms-queue name="InventoryQueue">
+		<entry name="jms/queue/InventoryQueue" />
+		<entry name="java:jboss/exported/jms/queue/InventoryQueue" />
+	</jms-queue>
+	<!--End -->
+</jms-destinations>
+[/code]
+Console Text on startup which indicates the Bean has been started.
+[code]
+23:41:20,398 INFO  [org.jboss.as.ejb3] (MSC service thread 1-7) JBAS014142: Started message driven bean 'InventoryUpdationBean' with 'hornetq-ra' resource adapter
+[/code]
+Dummy Testcase to just invoke the MDB.
+[code language="java"]
+public class InventoryUpdateTester extends TestCase {
+	ConnectionFactory factory;
+	Queue queue;
+
+	public void setUp() {
+		try {
+			queue = LookupUtility.lookup(Queue.class,
+					"java:/jms/queue/InventoryQueue");
+			factory = LookupUtility.lookup(ConnectionFactory.class,
+					"jms/RemoteConnectionFactory");
+		} catch (NamingException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void testUpdate() throws JMSException {
+		Connection connection = factory.createConnection();
+		Session session = connection.createSession(false,
+				QueueSession.AUTO_ACKNOWLEDGE);
+
+		MessageProducer producer = session.createProducer(queue);
+		Item[] items = new Item[4];
+		items[0] = new Item("soap", 100.33f);
+		items[1] = new Item("pencil", 20.33f);
+		items[2] = new Item("pen", 50.33f);
+		items[3] = new Item("book", 16.33f);
+		ObjectMessage message = session.createObjectMessage(items);
+		producer.send(message);
+	}
+}
+[/code]
+Output in the console.
+[code]
+23:23:33,562 INFO  [org.jboss.as.naming] (Remoting "achuth" task-16) JBAS011806: Channel end notification received, closing channel Channel ID 0a8878ea (inbound) of Remoting connection 2ff16233 to /127.0.0.1:36065
+23:23:33,586 INFO  [stdout] (Thread-4 (HornetQ-client-global-threads-163640510)) Received Item:Item [name=soap, price=100.33]
+23:23:33,587 INFO  [stdout] (Thread-4 (HornetQ-client-global-threads-163640510)) Received Item:Item [name=pencil, price=20.33]
+23:23:33,587 INFO  [stdout] (Thread-4 (HornetQ-client-global-threads-163640510)) Received Item:Item [name=pen, price=50.33]
+23:23:33,587 INFO  [stdout] (Thread-4 (HornetQ-client-global-threads-163640510)) Received Item:Item [name=book, price=16.33]
+[/code]
+

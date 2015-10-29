@@ -1,0 +1,113 @@
+Though generally called Software Design Principles, directly or indirectly we apply these everyday in all walks of life in ordered to solve various problems.
+
+(SOLID)
+Single responsibility principle(SRP)
+    A class should have only a single responsibility.
+
+Open/closed principle(OCP)
+    Software entities should be open for extension, but closed for modification.
+
+Liskov substitution principle(LSP)
+    Objects in a program should be replaceable with instances of their subtypes without altering the correctness of that program.
+
+LSP Violation:
+
+[code language="java"]
+// A Square class.
+Class Rectangle {
+    double width;
+    double height;
+    Rectangle(double width, double height) {
+        this.width = width;
+        this.height = height;
+    }
+    public double getWidth() {
+        return width;
+    }
+    public void setWidth(double width) {
+        this.width = width;
+    }
+    public double getHeight() {
+        return height;
+    }
+    public void setHeight(double height) {
+        this.height = height;
+    }
+    public double area() {
+        return height * width;
+    }
+}
+[/code]
+
+[code language="java"]	
+class Square extends Rectangle {
+    public Square(double s) {
+        super(s, s);
+    }
+    public void setWidth(double w) {
+        super.setWidth(w);
+        super.setHeight(w);
+    }
+    public void setHeight(double h) {
+        super.setHeight(h);
+        super.setWidth(h);
+    }
+}
+[/code]
+
+[code language="java"]	
+class TestRectangle {
+    // Define a method that takes a Rectangle reference.
+    public static void testLSP(Rectangle r) {
+        r.setWidth(4.0);
+        r.setHeight(5.0);
+        System.out.println(“Width is 4.0 and Height is 5.0″ + “, so Area is “
+                + r.area());
+        if (r.area() == 20.0)
+            System.out.println(“Looking good!\n”);
+        else
+            System.out.println(“Huh?? What kind of rectangle is this??\n”);
+    }
+    public static void main(String args[]) {
+        // Create a Rectangle and a Square
+        Rectangle r = new Rectangle(1.0, 1.0);
+        Square s = new Square(1.0);
+        // Now call the method above. According to the
+        // LSP, it should work for either Rectangles or
+        // Squares. Does it??
+        testLSP(r);
+        testLSP(s);
+    }
+}
+[/code]
+
+Interface segregation principle(ISP)
+    Many client-specific interfaces are better than one general-purpose interface.
+
+Dependency inversion principle(DIP)
+    One should Depend upon Abstractions. Do not depend upon concretions.
+
+Hollywood principle(or Inversion Of Control/Dependency Injection)
+    "Don't call us, we'll call you". 
+
+DRY (Don't repeat yourself) 
+
+Interface Segregation Principle (ISP): The dependency of one class to another one should depend on the smallest possible interface.
+
+Separation of concerns(SOC): Divide code into sections such that each one addresses a seperate concern. 
+
+Common Closure Principle (CCP): The classes in a package should be closed together against the same kinds of changes. A change that affects a package affects all the classes in that package.
+
+Common Reuse Principle (CRP): The classes in a package are reused together.
+
+Acyclic Dependencies Principle (ADP): The dependency structure between packages must not contain cyclic dependencies.
+
+Stable Dependencies Principle (SDP): Architectures must be crafted using a set of stable dependencies. This is also related to the DIP principle.
+
+Stable Abstraction Principle (SAP): An architecture should contain as many stable abstractions as possible, and these abstractions should be isolated from the ones that are more likely to change.
+
+Law Of Demeter (LoD): 
+    Each unit should have only limited knowledge about other units: only units "closely" related to the current unit.
+    Each unit should only talk to its friends; don't talk to strangers.
+    Only talk to your immediate friends.
+eg. Sometimes Chain of Responsibility Pattern are written to follow this principle.

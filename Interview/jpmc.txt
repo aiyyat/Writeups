@@ -1,0 +1,38 @@
+The Post is on the first round of JPMC interview which was a coding test consisting of 2 questions of decent standard, which I found worth sharing. 
+I happened to clear this test and following was my solution:
+
+One of the criterias of test was that the solution is to adhere to Robert C Martin's views in his book 'Clean Code'. Lucky me, this book had caught my attention six months before I attempted the test.
+
+Book can downloaded here: 
+https://drive.google.com/file/d/0B3_Ly85tru41bUtiQkRRN0hFT00/view?usp=sharing
+
+As the book prescribes, any code must just have comments that are unavoidable in nature, there is just one section of comments to describe the definition of the Jargons I discovered for the purpose of the solution.
+Additionally, the method names were to be quite self explanatory of its purpose and fine grained enough to serve a single purpose. Each Method only performed a single level of Abstraction. 
+
+As described in the book, the solution was an effort to adhere to the common Design Principles: 
+OCP - an RCM prescription for OOPLs
+SRP
+LoD
+DRY
+etc.  
+which can already be found in my Post: 
+https://technicalyorker.wordpress.com/2015/04/27/common-software-design-principles/
+
+The solution in itself was a pursuit to attain seamlessly readable and effortlessly understandable code. 
+
+Additionally, the 'simply' working code base had to go through multiple revisions of improvement to its method and identifier names before it was redeemed even presentable.  
+With a fairly good test coverage of the solution, almost all public methods have been asserted while unit testing.  
+
+Source: https://github.com/technicalyorker/source/blob/master/JPMC
+Question:
+https://github.com/technicalyorker/source/blob/master/JPMC/resources/Test.txt
+
+PROBLEM 1
+Main Classes: https://github.com/technicalyorker/source/tree/master/JPMC/src/main/java/com/jpmc/problem1
+Test Classes: https://github.com/technicalyorker/source/tree/master/JPMC/src/test/java/com/jpmc/problem1
+
+Problem 2:
+Class diagram: https://github.com/technicalyorker/source/blob/master/JPMC/resources/problem2.png
+Main Classes: https://github.com/technicalyorker/source/tree/master/JPMC/src/main/java/com/jpmc/problem2
+Better Representation of the question: https://github.com/technicalyorker/source/blob/master/JPMC/resources/Problem2.xlsx
+Test Classes: https://github.com/technicalyorker/source/tree/master/JPMC/src/test/java/com/jpmc/problem2 

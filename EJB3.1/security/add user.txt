@@ -1,0 +1,28 @@
+achuth@achuth-Lenovo-G410:~/Softwares/jboss/bin$ ./add-user.sh 
+
+What type of user do you wish to add? 
+ a) Management User (mgmt-users.properties) 
+ b) Application User (application-users.properties)
+(a): b
+
+Enter the details of the new user to add.
+Using realm 'ApplicationRealm' as discovered from the existing property files.
+Username : user1    
+Password requirements are listed below. To modify these restrictions edit the add-user.properties configuration file.
+ - The password must not be one of the following restricted values {root, admin, administrator}
+ - The password must contain at least 8 characters, 1 alphabetic character(s), 1 digit(s), 1 non-alphanumeric symbol(s)
+ - The password must be different from the username
+Password : 
+Re-enter Password : 
+What groups do you want this user to belong to? (Please enter a comma separated list, or leave blank for none)[  ]: user_group
+About to add user 'user1' for realm 'ApplicationRealm'
+Is this correct yes/no? yes
+Added user 'user1' to file '/home/achuth/Softwares/jboss/standalone/configuration/application-users.properties'
+Added user 'user1' to file '/home/achuth/Softwares/jboss/domain/configuration/application-users.properties'
+Added user 'user1' with groups user_group to file '/home/achuth/Softwares/jboss/standalone/configuration/application-roles.properties'
+Added user 'user1' with groups user_group to file '/home/achuth/Softwares/jboss/domain/configuration/application-roles.properties'
+Is this new user going to be used for one AS process to connect to another AS process? 
+e.g. for a slave host controller connecting to the master or for a Remoting connection for server to server EJB calls.
+yes/no? yes
+To represent the user add the following to the server-identities definition <secret value="P0RheWxpZ2h0czEyMw==" />
+

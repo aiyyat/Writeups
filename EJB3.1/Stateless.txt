@@ -1,0 +1,264 @@
+﻿The tutorial throws an insight into Stateless Session Bean on EJB 3.0.
+Softwares Used:
+1. Eclipse  Luna Release (4.4.0)
+2. Apache Maven 3.2.5
+3. Java version "1.7.0_75" 
+4. Jboss EAP Version 6.3.0.GA
+
+Getting Started:
+Once a Maven project of packaging type jar in the project object model xml configuration file is created, following entries are to be added for maven to download dependencies:
+pom.xml
+[code language="xml"]
+		<dependency>
+			<groupId>javax</groupId>
+			<artifactId>javaee-api</artifactId>
+			<version>6.0</version>
+			<scope>provided</scope>
+		</dependency>[/code]
+Maven scope:
+Provided Scope: Required during compilation and running of the application but not to be included in the package since it is provided in the runtime environment withing our App Server.
+
+Now that the development Environment is ready, its time to create the Session Beans. As of JEE5 EJBs implement has to implement interfaces for its Enterprise Beans. Apart from being a good design  recommendation, interfaces are required for runtime proxying (java reflection) to introduces functionalities like remoting, security, transactions etc. Please follow the blog on proxying for details.
+
+SuperMarketCustomerService.java
+[code language="java"]
+@Remote
+public interface SuperMarketCustomerService {
+	String answerEnquiry(String question);
+
+	Receipt billItems(List<Item> item);
+}
+[/code]
+When the interfaces are annotated javax.ejb.Remote the implmentations silently introduces a stub and a skeleton which does all the socket communication and serialization jobs silently behind the scenes by virtue of Proxying.
+
+An implementation of Stateless Session Bean is as below.
+SuperMarketCustomerServiceImpl.java
+[code language="java"]
+/**
+ * 
+ * @author achuth
+ *
+ *         In our case I assume every instance of a Customer Service
+ *         Implementation will be a Customer Service Executive.
+ */
+@Stateless
+public class SuperMarketCustomerServiceImpl implements
+		SuperMarketCustomerService {
+	private int executiveNumber;
+
+	/**
+	 * This method assigns each instance of this Stateless Session Bean an
+	 * executive number at bean initialization Call Back. We will be using this
+	 * to understand how Statelessness works.
+	 * 
+	 * Note: We are not supposed to have maintain member variables that can
+	 * introduce the 'State' to a SLSB since it is not guaranteed that the
+	 * subsequent request is even served by same instance, though we can have
+	 * variables such as an 'executive number' or a logger Object. This doesn't
+	 * mean the Bean itself is not Thread safe which it is. Introducing a member
+	 * variable such as the current customer name might make application display
+	 * weird characteristics.
+	 */
+	@PostConstruct
+	public void init() {
+		this.executiveNumber = CustomerServiceExecutiveUtility
+				.generateExecutiveNumber();
+		System.out.println("Assigned Executive" + executiveNumber);
+	}
+
+	/**
+	 * This is generally answering Customer Queries via Telephone or email for
+	 * example. It is not really guaranteed who serves the request though all
+	 * requests are answered the same way.
+	 * 
+	 * Ask me only 2 questions or I just bid goodbye and hang the phone.
+	 */
+	public String answerEnquiry(String question) {
+		if (question.equals("timings?")) {
+			return "This is Executive Number" + executiveNumber
+					+ " answering you, we are open from 8am to 8pm";
+		} else if (question.equals("who are you?")) {
+			return "I am Executive Number" + executiveNumber;
+		} else {
+			return "This is Executive Number" + executiveNumber
+					+ " bidding you goodbye";
+		}
+	}
+
+	/**
+	 * Given a cart full of Items any customer service executive can bill the
+	 * items and produce a Receipt.
+	 */
+	public Receipt billItems(List<Item> items) {
+		Receipt receipt = new Receipt();
+		for (Item item : items) {
+			receipt.addEntry(item);
+		}
+		return receipt;
+	}
+}
+[/code]
+Now that we are through the Stateless Session Bean, we have to build and deploy it probably as a JBoss Standalone application. On starting up the console shows the following contents on start up. This will give us an glimpse of the jndi information against which this bean is registered in JBoss JNDI. 
+[code]
+	java:global/EJB/SuperMarketCustomerServiceImpl!org.company.project.ejb.stateless.supermarket.SuperMarketCustomerService
+	java:app/EJB/SuperMarketCustomerServiceImpl!org.company.project.ejb.stateless.supermarket.SuperMarketCustomerService
+	java:module/SuperMarketCustomerServiceImpl!org.company.project.ejb.stateless.supermarket.SuperMarketCustomerService
+	java:jboss/exported/EJB/SuperMarketCustomerServiceImpl!org.company.project.ejb.stateless.supermarket.SuperMarketCustomerService
+	java:global/EJB/SuperMarketCustomerServiceImpl
+	java:app/EJB/SuperMarketCustomerServiceImpl
+	java:module/SuperMarketCustomerServiceImpl
+[/code]
+Item.java
+[code language="java"]
+public class Item implements Serializable {
+	private static final long serialVersionUID = -2515638439007957404L;
+	private String name;
+	private float price;
+
+	public String getParticular() {
+		return name;
+	}
+
+	public void setParticular(String particular) {
+		this.name = particular;
+	}
+
+	public float getPrice() {
+		return price;
+	}
+
+	public void setPrice(float price) {
+		this.price = price;
+	}
+
+	public Item(String particular, float price) {
+		this.name = particular;
+		this.price = price;
+	}
+
+	@Override
+	public String toString() {
+		return "Item [name=" + name + ", price=" + price + "]";
+	}
+[/code]
+Finally Receipt.java
+[code language="java"]
+/**
+ * @author achuth
+ *
+ */
+public class Receipt implements Serializable {
+	private static final long serialVersionUID = -4379462140428211041L;
+	List<Item> entries = new ArrayList<Item>();
+	float discount;
+	float billAmount;
+
+	public List<Item> getEntries() {
+		return entries;
+	}
+
+	public void addEntry(String particular, float price) {
+		addEntry(new Item(particular, price));
+	}
+
+	public void addEntry(Item entry) {
+		this.entries.add(entry);
+	}
+
+	public float getDiscount() {
+		return discount;
+	}
+
+	public void setDiscount(float discount) {
+		this.discount = discount;
+	}
+
+	public float getBillAmount() {
+		for (Item entry : entries) {
+			billAmount += entry.getPrice();
+		}
+		return billAmount * (100 - discount) / 100;
+	}
+
+	public void setEntries(List<Item> entries) {
+		this.entries = entries;
+	}
+
+	@Override
+	public String toString() {
+		return "Receipt [entries=" + entries + ", discount=" + discount
+				+ ", billAmount=" + getBillAmount() + "]";
+	}
+[/code]
+Now for the Client Application:
+
+Lookup Utility File
+[code language="java"]
+public class LookupUtility {
+	private static Context context;
+	static {
+		try {
+			Security.addProvider(new JBossSaslProvider());
+			final Hashtable<String, String> p = new Hashtable<String, String>();
+			p.put(Context.PROVIDER_URL, "remote://127.0.0.1:4447");
+			p.put(Context.URL_PKG_PREFIXES, "org.jboss.ejb.client.naming");
+			p.put(Context.SECURITY_PRINCIPAL, "test");
+			p.put(Context.SECURITY_CREDENTIALS, "test123");
+			p.put(Context.INITIAL_CONTEXT_FACTORY,
+					"org.jboss.naming.remote.client.InitialContextFactory");
+			context = new InitialContext(p);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static final Context getContext() {
+		return context;
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T> T lookup(Class<T> clazz, String lookupName)
+			throws NamingException {
+		try {
+			return (T) getContext().lookup(lookupName);
+		} catch (NamingException e) {
+			throw e;
+		}
+	}
+[/code]
+
+Now for the Testcase
+[code language="java"]
+public class CustomerTester extends TestCase {
+	SuperMarketCustomerService service = null;
+
+	public void setUp() {
+		try {
+			service = LookupUtility
+					.lookup(SuperMarketCustomerService.class,
+							"ejb:/EJB/SuperMarketCustomerServiceImpl!org.company.project.ejb.stateless.supermarket.SuperMarketCustomerService");
+		} catch (NamingException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void testEnquiry1() {
+		assertEquals("I am Executive Number0",
+				service.answerEnquiry("who are you?"));
+	}
+
+	public void testEnquiry2() {
+		assertEquals("I am Executive Number0",
+				service.answerEnquiry("who are you?"));
+	}
+
+	public void testEnquiry3() {
+		List<Item> items = new ArrayList<Item>();
+		items.add(new Item("Soap", 3.4F));
+		items.add(new Item("Bread", 13.4F));
+		items.add(new Item("Banans", 4.4F));
+		System.out.println(service.billItems(items));
+	}
+}
+[/code]
+The Receipt and Item is deserialized and thus reconstructed at the client side. The vital thing to know is that for Multiple clients the same bean instance could be reused from the bean pool, yet subsequent method calls to the same client side proxy could happen across different bean instances.

@@ -1,0 +1,285 @@
+Security in the JEE world has been rather standardized. Standardization is quite like buying a mobile sim card. One buys a sim card which can be used in almost any GSM mobile phones. With different mobile service providers, the quality of service differs though the underlying service they provide is one and the same. When it comes to JEE the security standardization comes in the form of JAAS or Java Authentication and Authorization Service. This helps us define the security configurations in accordance to our needs while the realm is often configured with the Application or Web server itself. While few may provide a GUI for the configuration, few others demand XML configuration change.
+In Web module the deployment descriptor - web.xml helps define the security configurations. There are primarily various types of authentication methods.
+1) BASIC
+2) FORM
+3) DIGEST
+4) CLIENT-CERT
+As the name suggest basic is the most basic of authentication methods where the username and password is passed in the header as in Screenshot below. 
+
+Every browser usually comes with a login popup which is generally made used BASIC Authentication method to recieve the user name and password. In case of Basic and Digest(Not supported by All App Servers though), the user name and password usually not encrypted or Base 64 Encoded, which is not usually very safe. It can be decoded without much hassle.     
+
+Form on the other hand helps us define a custom login and error pages. The password information is send along, in the HTTP request body. 
+
+These forms of authentication methods are prone to attacks by eve droppers who could simply read the username password from the request. To prevent this we usually make use of a asymitrical encryptions that enable us to encrypt using a public key but only decrypt using a private key. The public key can be used for nothing more than encryption and hence it is freely distributed for encryption. The private key is with the App/Web server who uses this to decrypt the encrypted contents. Hence the eve-droppers can at most get their hands into the encrypted contents which is not very useful without the private key. This is enabled by vitrue of the CLIENT-CERT, which will be described along with the WildFly Posts later. Once the configurations are made JBoss or other servers can do the authentication with the help of its "Proprietary Deployment Descriptors", jboss-web.xml in case of Wildfly in WebApps. This is used to relate to the security domain defined in the JBoss app server which could define the realm. Realms could be configured against almost any standard authentication sources like Database, LDAP, Management(in case of JBoss) etc. One can even write ones JAAS extension. More about this in the later blogs. 
+While authentication is check the user is who is, authorization is one where the user rights are validated. EJB allows Authorization at a class and method levels via annotations such as 
+1) @PermitAll
+2) @DenyAll
+3) @RolesAllowed
+4) @RunAs
+5) @DeclareRoles
+As the name suggests @RolesAllowed permits the method access to all the prescribed roles defined within its attributes. This is matched against the roles defined in the web.xml and security realm used for authentication. Once authenticated the user is assigned a role which is used to do the authorization. 
+In the below example of a Bank, there are 3 kinds of information, which are accessible to 3 different audience. 
+1) A General Information which is available to entire public who ever logins (as guest or otherwise)
+2) The customer information which is available to only the customer and the manager. 
+3) The credit Record Status which are only visible to the manager. 
+
+They are defined by the names guest-role,customer-role & manager-role respectively.
+
+Account Servlet.   
+[code language="java"]
+public class AccountServlet extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+	@EJB
+	AccountServiceRemote service;
+
+	public AccountServlet() {
+	}
+
+	protected void doGet(HttpServletRequest request,
+			HttpServletResponse response) throws ServletException, IOException {
+		Short str = new Short(request.getParameter("type"));
+		PrintWriter out = response.getWriter();
+		switch (str) {
+		case 1:
+			out.print(service.getPublicInformation());
+			break;
+		case 2:
+			out.print(service.getAccountInformation());
+			break;
+		case 3:
+			out.print(service.getCreditHistory());
+			break;
+		default:
+			out.print("No Operation");
+		}
+	}
+}
+[/code]
+
+web.xml deployment descriptor
+[code language="xml"]
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://java.sun.com/xml/ns/javaee"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	id="WebApp_ID" version="2.5">
+	<display-name>BankWeb</display-name>
+	<welcome-file-list>
+		<welcome-file>index.html</welcome-file>
+	</welcome-file-list>
+	<servlet>
+		<description></description>
+		<display-name>AccountServlet</display-name>
+		<servlet-name>AccountServlet</servlet-name>
+		<servlet-class>org.bank.project.web.AccountServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>AccountServlet</servlet-name>
+		<url-pattern>/AccountServlet</url-pattern>
+	</servlet-mapping>
+	<security-constraint>
+		<web-resource-collection>
+			<web-resource-name>HtmlAuth</web-resource-name>
+			<url-pattern>/*</url-pattern>
+			<http-method>GET</http-method>
+			<http-method>POST</http-method>
+		</web-resource-collection>
+		<auth-constraint>
+			<role-name>guest-role</role-name>
+			<role-name>customer-role</role-name>
+			<role-name>manager-role</role-name>
+		</auth-constraint>
+	</security-constraint>
+	<login-config>
+		<auth-method>FORM</auth-method>
+		<form-login-config>
+			<form-login-page>/login.html</form-login-page>
+			<form-error-page>/error.html</form-error-page>
+		</form-login-config>
+	</login-config>
+	<security-role>
+		<role-name>guest-role</role-name>
+	</security-role>
+	<security-role>
+		<role-name>customer-role</role-name>
+	</security-role>
+	<security-role>
+		<role-name>manager-role</role-name>
+	</security-role>
+</web-app>
+[/code]
+login.html file.
+[code language="html"]
+<html>
+<head>
+<title>Login Page</title>
+</head>
+
+<h2>Hello, please log in:</h2>
+<br>
+<br>
+<form action="j_security_check" method=post>
+	<p>
+		<strong>Please Enter Your User Name: </strong> <input type="text"
+			name="j_username" size="25">
+	<p>
+	<p>
+		<strong>Please Enter Your Password: </strong> <input type="password"
+			size="15" name="j_password">
+	<p>
+	<p>
+		<input type="submit" value="Submit"><input type="reset"
+			value="Reset">
+</form>
+</html>
+[/code]
+Error.html
+[code language="html"]
+<html>
+<head>
+<title>Login Page</title>
+</head>
+
+<h2>Invalid Login or Password</h2>
+<br>
+<br>
+<form action="j_security_check" method=post>
+	<p>
+		<strong>Please Enter Your User Name: </strong> <input type="text"
+			name="j_username" size="25">
+	<p>
+	<p>
+		<strong>Please Enter Your Password: </strong> <input type="password"
+			size="15" name="j_password">
+	<p>
+	<p>
+		<input type="submit" value="Submit"><input type="reset"
+			value="Reset">
+</form>
+</html>
+[/code]
+Remote Interface to Account Service.
+[code language="java"]
+@Remote
+public interface AccountServiceRemote {
+	public String getPublicInformation();
+
+	public String getAccountInformation();
+
+	public String getCreditHistory();
+}
+[/code]
+AccountService Bean implementation.
+[code language="java"]
+@Stateless
+@SecurityDomain(value = "other")
+public class AccountService implements AccountServiceRemote {
+	private static final String[] status = { "Unknown", "Defaulter", "Clean" };
+
+	@Resource
+	SessionContext context;
+
+	public AccountService() {
+	}
+
+	@Override
+	@PermitAll
+	public String getPublicInformation() {
+		return "Bank Pvt Ltd was established in 1999!";
+	}
+
+	@Override
+	@RolesAllowed({ "customer-role", "manager-role" })
+	public String getAccountInformation() {
+		return "Account of " + context.getCallerPrincipal().getName() + " is $"
+				+ getRandom(10000);
+	}
+
+	@Override
+	@RolesAllowed("manager-role")
+	public String getCreditHistory() {
+		return "This Credit History of "
+				+ context.getCallerPrincipal().getName() + " is "
+				+ status[getRandom(status.length)];
+	}
+
+	private static final int getRandom(int pilot) {
+		return (int) (pilot * Math.random());
+	}
+}
+[/code]
+jboss-web.xml JBoss Propertatory Deployment Descriptor.
+[code language="java"]
+<jboss-web>
+	<security-domain>java:/jaas/other</security-domain>
+</jboss-web>
+[/code]
+Excerpt from Standalone(-full) or Domain xml file used to configure WildFly App Server. 
+[code language="java"]
+<subsystem>
+	<security-management deep-copy-subject-mode="true" />
+	<security-domains>
+		<security-domain name="jBossJaasMysqlRealm">
+			<authentication>
+				<login-module code="Database" flag="required">
+					<module-option name="dsJndiName" value="java:/jBossJaasMysql" />
+					<module-option name="principalsQuery"
+						value="select password from users where username = ?" />
+					<module-option name="rolesQuery"
+						value="select roleName,'Roles' from users_roles where username=?" />
+				</login-module>
+			</authentication>
+		</security-domain>
+		<!-- Default, which we are going to use -->
+		<security-domain name="other" cache-type="default">
+			<authentication>
+				<login-module code="Remoting" flag="optional">
+					<module-option name="password-stacking" value="useFirstPass" />
+				</login-module>
+				<login-module code="RealmDirect" flag="required">
+					<module-option name="password-stacking" value="useFirstPass" />
+				</login-module>
+			</authentication>
+		</security-domain>
+		<security-domain name="jboss-web-policy" cache-type="default">
+			<authorization>
+				<policy-module code="Delegating" flag="required" />
+			</authorization>
+		</security-domain>
+		<security-domain name="jboss-ejb-policy" cache-type="default">
+			<authorization>
+				<policy-module code="Delegating" flag="required" />
+			</authorization>
+		</security-domain>
+		<security-domain name="test" cache-type="default">
+			<authentication>
+				<login-module code="test" flag="required" />
+			</authentication>
+		</security-domain>
+	</security-domains>
+</subsystem>
+[/code]
+Excerpt from Standalone(-full) or Domain xml file used to configure WildFly App Server. 
+[code language="xml"]		
+<security-realms>
+	<security-realm name="ApplicationRealm">
+		<authentication>
+			<local default-user="$local" allowed-users="*"
+				skip-group-loading="true" />
+			<properties path="application-users.properties"
+				relative-to="jboss.server.config.dir" />
+		</authentication>
+		<authorization>
+			<properties path="application-roles.properties"
+				relative-to="jboss.server.config.dir" />
+		</authorization>
+	</security-realm>
+</security-realms>
+[/code]
+application-roles.properties
+[code language="xml"]
+guest=guest-role
+customer=customer-role
+manager=manager-role
+[/code]
+

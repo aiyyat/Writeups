@@ -1,0 +1,10 @@
+Software Industry in the recent past has seen a lot of Maturity in terms of Architectural Designs & Patterns. Yet most of the Architects resort to traditional patterns such as layered architecture patterns for any new application as if it were an industry wide de facto even in situations where it is not the best fit. This partly is due to the popularity of the Architectural Pattern and the fact that a team is generally made up of seperate sub-units based on the expertise or roles. This practise often results in the anti-pattern which is called a Big Ball of Mud.
+Few of the Architectural Patterns described in the blog are: 
+>N-Tier Architectural Pattern
+>Event-Driven Architectural Pattern
+>Microkernel Architectural Pattern
+>Microservices Architectural Pattern   
+>Space Based Architectural Pattern
+One must decide the fitment of each pattern based various parameters such as performance, scalability, responsiveness etc.
+
+# refer blog - Common Software Design Principles

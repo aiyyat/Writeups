@@ -1,0 +1,148 @@
+Interceptors are primarily useful is the persuit of seperation of concern. Programming trend is that Concerns such Logging, Transactions, Security are wired or configured as seperate concerns. The concept is generalized under the name AOP or Aspect Oriented Programming. Dedicated tools such as AspectJ, Spring AOP and JBoss AOP help achieve proxying at different levels commenly known by the name Advice. Usually the proxying happens at the method level though few AOP tools such as JBoss AOP & AspectJ allows proxying at field level itself.
+EJB interceptors aren't so sophisticated after all. EJB allows interceptors at 3 levels 
+1)Default or across many classes
+2)At class levels i.e applicable to all the methods in the class
+3)At method level.
+
+Once configured the interception happens unless explicitly excluded using the @ExcludeDefaultInterceptors or the @ExcludeClassInterceptors.
+The Default Interceptors are usually defined in the EJB Deployment Descriptor called ejb-jar.xml.
+Following code demonstrates Interceptors applied at a Method and Class levels.
+The InvocationContext is a parameter maintained and passed as a parameter by the EJB Container. The object can be used to access various methods that gives inkling about the Target Methods, parameters,timers etc. One can use it to access/modify the parameters for example.
+A proceed method returns an object that is to be returned for the chain to continue. 
+The Interceptors are usually follow the Chain of Responsibility (COR) pattern, the flow of which can be largely controlled by these interceptors. For example a Security Interceptor can decide to discontinue the chain.
+
+Interceptors usually come in one of the 3 forms. 
+1) Compile Type Interception
+2) Byte Code Manipulation Interception 
+3) RunTime Proxying Interception.
+More about each with corresonding code in another blog. But in short JEE Spec for EJB Interception recommends Runtime Proxying interception which mandates one to implement interface to create a proxy which is probably why it is the case with JEE 5 along with object reconstruction, which largely changed with the JEE 6 for local beans. However Spring for example gives an option to its users to either implement or not implement the interface (implementing it is generally considered as you are then programming to an interface is considered a better practise) the interface. When one is implementing it goes by the JSDK proxying, else it will decide to go for CGLib or Javassist Proxying which is Byte Code Manipulation. Compile Time and Byte code Manipulation are obviously more performant than the 3rd type.
+    
+Timer Interceptor: It is possible to have life cycle methods at the interceptor level along with on a service as well. Yet even inside interceptor behave not very different from life cycle methods on a service. 
+[code language="java"]
+public class TimerInterceptor {
+	@PostConstruct
+	public void afterConstructor() {
+		System.out.println("Inteceptor: After Constructor");
+	}
+
+	@PreDestroy
+	public void preDestroy() {
+		System.out.println("Inteceptor: Before Destroy");
+	}
+
+	@AroundInvoke
+	public Object intercept(InvocationContext invocationContext) {
+		Calendar currentTime = Calendar.getInstance();
+		Object o = null;
+		try {
+			o = invocationContext.proceed();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		System.out.println(invocationContext.getTarget()
+				+ ">"
+				+ (Calendar.getInstance().getTimeInMillis() - currentTime
+						.getTimeInMillis()) / 1000 + "s");
+		return o;
+	}
+}
+[/code]
+
+Greetings Interceptor
+[code language="java"]
+public class GreetingsInterceptor {
+	@AroundInvoke
+	public Object intercept(InvocationContext invocationContext) {
+		System.out.println("Welcome Sir!");
+		Object o = null;
+		try {
+			o = invocationContext.proceed();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		System.out.println("Have a nice Day!");
+		return o;
+	}
+}
+[/code]
+
+Here is a Trainee Customer Service Executive who is going to be monitored by her boss as to how much time she takes to do her tasks. She is also supposed to be Greeting the Customer when he comes in for getting his queries addressed.
+[code language="java"]
+@Interceptors(TimerInterceptor.class)
+@Stateless
+public class TraineeCustomerServiceImpl implements TraineeCustomerService {
+	@PostConstruct
+	public void afterConstructor() {
+		System.out.println("Service: After Constructor");
+	}
+
+	@PreDestroy
+	public void preDestroy() {
+		System.out.println("Service: Before Destroy");
+	}
+
+	@Interceptors(GreetingsInterceptor.class)
+	public void answerUserQueries() {
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		System.out.println("User Query Answered after 1 second of Thinking...");
+
+	}
+
+	public void helpBillItems() {
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		System.out.println("Billing Done....");
+	}
+
+}
+[/code]
+
+Test Class to invoke the Trainee into action. 
+[code language="java"]
+public class TraineeServiceTester extends TestCase {
+
+	TraineeCustomerService service = null;
+
+	public void setUp() {
+		try {
+			service = LookupUtility
+					.lookup(TraineeCustomerService.class,
+							"ejb:/EJB/TraineeCustomerServiceImpl!org.company.project.ejb.stateless.TraineeCustomerService");
+		} catch (NamingException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void testCommitItems() {
+		service.answerUserQueries();
+	}
+}
+[/code]
+Once built and deployed JBoss shows the following in its console logs.
+[code]
+20:12:29,480 INFO  [org.jboss.as.ejb3.deployment.processors.EjbJndiBindingsDeploymentUnitProcessor] (MSC service thread 1-2) JNDI bindings for session bean named TraineeCustomerServiceImpl in deployment unit deployment "EJB.jar" are as follows:
+	java:global/EJB/TraineeCustomerServiceImpl!org.company.project.ejb.stateless.TraineeCustomerService
+	java:app/EJB/TraineeCustomerServiceImpl!org.company.project.ejb.stateless.TraineeCustomerService
+	java:module/TraineeCustomerServiceImpl!org.company.project.ejb.stateless.TraineeCustomerService
+	java:jboss/exported/EJB/TraineeCustomerServiceImpl!org.company.project.ejb.stateless.TraineeCustomerService
+	java:global/EJB/TraineeCustomerServiceImpl
+	java:app/EJB/TraineeCustomerServiceImpl
+	java:module/TraineeCustomerServiceImpl
+[/code]
+
+Output 
+[code]
+21:03:42,726 INFO  [stdout] (EJB default - 6) Inteceptor: After Constructor
+21:03:42,726 INFO  [stdout] (EJB default - 6) Service: After Constructor
+21:03:42,726 INFO  [stdout] (EJB default - 6) Welcome Sir!
+21:03:43,727 INFO  [stdout] (EJB default - 6) User Query Answered after 1 second of Thinking...
+21:03:43,728 INFO  [stdout] (EJB default - 6) Have a nice Day!
+21:03:43,729 INFO  [stdout] (EJB default - 6) org.company.project.ejb.stateless.supermarket.TraineeCustomerServiceImpl@1b1a90d0>1s
+[/code]

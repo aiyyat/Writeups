@@ -1,0 +1,22 @@
+Event Driven Architecture Design Pattern
+Event Driven Architectures primarily is a Distributed Asynchronous & highly scalable Architectural Pattern. The components are highly decoupled that does single purpose event processing. They come in two topologies
+>Mediator Topology
+>Broker Topology.
+
+Mediator Topology:
+This architecture is adopted when one might have to do a lot of Orchestration before processing the event. This means that there are series or parallel steps the event has to go through.
+There are 4 players in a mediator pattern
+>Event Queues
+>Event Mediator
+>Event Channel
+>Event Processors.
+An event queue can be anything, a Message queue or even something like a Web Service End Point. Events, once received by the Event queues are passed to the mediators who orchestrates the events. The events which these mediators recieve are also called the 'Initial Events'. Mediators are usually implemented using integrating frameworks such as Mule ESB, Camel ESB etc. In case of sophisticated requirements one can resort to using a BPEL or Business Process Managers(BPM) such as Activiti or jBPM.
+Once the mediation is done the events are sent to Processors via the Channels. This stage of the events are called the 'Processing Events'. Channels are queues or topics based on the business requirements. 
+Though it would be tempting, one must be careful not to make the mediator do the processing and processor do the meditation, for that could prove to be the points of failure of the architectural pattern.
+In one such projects that used this Design Pattern, it used Tibco BW to Orchestrate the events, further, a rule engine(JBoss Drools) to trigger events based on complex conditions to event channels that are consumed by processors these message event. Finally sends these processed messages to downstream systems. 
+Broker Topology:
+Yet another variant of the Event driven Architecture Pattern is the Broker Topology. Unlike the other Topology there is no one mediator to all events instead the federated broker lets the event flow through its various channels. Tibco BW could act as a broker receiving messages through Queues and after processing redirect the processed message event to another queue.
+One of the main challenges in Event Driven pattern is if the transactions have to span across separate processes. One would have to rely on standard data formats such as XML or JSON to establish connection within components.
+This pattern is particularly good in situations that demand adaptablity to change, since each component is loosly coupled from the others. Changes to one component seldom affect the others. Additionally a program that follows this pattern is much easier to deploy. The message destination deployed in this pattern sometimes ensure that messages are not lost even when the application is down for sometime for some reasons. Since the mediator and processor are tightly coupled a deployment in both may be required at times. Testing particularly is quite a difficult task due the asynchronous nature. Even simple assertions at a component level isn't all that easy. This is generally a high performant architecture pattern due to the asychronous capabilities.
+
+Watch out for the: Sample application demonstrating the two topologies soon. 
