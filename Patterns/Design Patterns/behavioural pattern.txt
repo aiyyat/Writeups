@@ -1,7 +1,7 @@
 State
 The example is that of a car which is moving along an X, Y coordinates of a canvas. The car can turn to one of the four directions North, South, East or West and accelerate Backward/Forward. The four directions in the example represent 4 Direction Facing State. For example when car is facing North it is in a North Facing State and thus State pattern. Additionally the movements and turns with respect to the current direction determines the position and direction of the car after the movement. 
 This example is quite similar to an old ThoughtWorks interview question on Rovers.
-source: https://github.com/technicalyorker/source/tree/master/Patterns/src/org/technicalyorker/dp/behavioural/state
+source: https://github.com/technicalyorker/patterns/tree/master/Patterns/src/org/technicalyorker/dp/behavioural/state
 
 Chain of Responsibility 
 Chain of Responsibility is a very commonly found design pattern. It can be used to alter the message flow characteristics in various frameworks. The beauty of this design patterns is that processors in the chain depending on how configurable it is, can be added and removed as desired. Servlet Filters makes use of this design pattern to intercept the requests and responses. One can write a security filter or a compression filter and attach at will, to cater to various requirements of the Application. This is sometimes known by the name 'Intercepting Filters' in JEE pattern terms. Other frame works such as Axis 2 use this to bring in various Messaging requirements of webservices. This has enabled the creators to release and attach features of Web Services specifications at different times or provide them seperately. Reliable Messaging is one such module which can be attached and detached when situation demands. Struts 2 is yet another example that uses this design pattern to extensive levels.
@@ -9,29 +9,29 @@ Here the message objects are sent from links to links that make up the chain.
 The simple example is that of a framework that accepts message requests processes them sends a response, quite like how Java Servlet Framework accept HTTP Requests and respond with an HTTP Response. 
 There are handlers that receives requests, a SecurityHandler which authenticates the requests, prepares Response objects etc. A ChainProcessor registers these Handlers. If I had the luxury of time, my EndPointHandler would have intercepted both request and response objects, the PropertiesParameterHandler would have converted requests to Model maps and the response message would have been derived from the response model maps etc. 
 Servlet Filters on the other hand acts Around the Invocation of the filter chains links which let it intercept both the request and response. Browsers support decompression of compressed objects such as a pdf documents which is primarily achieved by virtue of configured Response wrappers. As of Servlet 2.5 the filters are configured as matching URL patterns in the web.xml deployment descriptor. 
-source: https://github.com/technicalyorker/source/tree/master/Patterns/src/org/technicalyorker/dp/behavioural/cor
+source: https://github.com/technicalyorker/patterns/tree/master/Patterns/src/org/technicalyorker/dp/behavioural/cor
 
 Command Pattern
 Command Pattern is yet another pattern commonly found in a lot of framework. Struts, Spring MVC are just few of the examples. One main advantage of this pattern is that the object processor is the only one aware of how to execute it. It is the least concern of the caller. This is achieved by virtue of the Command class's execute operation. 
 Our example is one such mini-framework which contains an ActionContext that is ThreadLocal in nature. ActionContext is used to accumulate information across layers and contains an CommandModel, Exception information, Action Command, request parameters and other pieces of information which are required both by the framework itself and developer to make decisions. ActionStatus defines the various possible status e.g. outcomes of a Command Execution. Finally, the Command Model is container of the exchange values that maintained by the context.
 Just as in any framework the ActionController acts based on the input of the user. In case of MVC Frameworks such as Struts the controller acts on the inputs received through an HTTP Request. In our example the client gives the controller the command to add a user by passing the action as 'AddUserAction'. Upon receiving the request it invokes the AddUserAction command. The action class returns an Action Status based on result of execution. If failure, the action context is populated with an ActionExecutionException. In a lot of frameworks the context later goes to become a part of the response such as an HTTP Response.
-source: https://github.com/technicalyorker/source/tree/master/Patterns/src/org/technicalyorker/dp/behavioural/command
+source: https://github.com/technicalyorker/patterns/tree/master/Patterns/src/org/technicalyorker/dp/behavioural/command
 
 Observer
 The main players of the Observer pattern are the subject and the observers. In the example The Rates Generator Engine simulates a Rate Provider System, whose inputs are feeds to this system. The observers which listen to the polled input of the Rates Engines. The Observers implement the RatesObserver interface and inturn provides custom implementation for the onRateNotified() method. AverageMidRateValuePanel is one such an implementation which outputs the new average value everytime a new Rate is fed into the system. Simultaneously the LatestRateValuePanel displays the Latest values of Ask, Bid and Mid. Java Provides the interfaces such as Observable for adoption of this pattern. 
-source:https://github.com/technicalyorker/source/tree/master/Patterns/src/org/technicalyorker/dp/behavioural/observer
+source:https://github.com/technicalyorker/patterns/tree/master/Patterns/src/org/technicalyorker/dp/behavioural/observer
 
 Iterator
 This is a very commonly used Design pattern particularly in the Java Collections Framework. This example defines MonthArrayList which is marked Iteratable using the Market Interface Iterable. It provides implementation for the iterator Method that returns an instance of MonthIterator.
-source: https://github.com/technicalyorker/source/tree/master/Patterns/src/org/technicalyorker/dp/behavioural/iterator
+source: https://github.com/technicalyorker/patterns/tree/master/Patterns/src/org/technicalyorker/dp/behavioural/iterator
 
 Coming Soon!
 
 Memento
-source:https://github.com/technicalyorker/source/tree/master/Patterns/src/org/technicalyorker/dp/behavioural/memento
+source:https://github.com/technicalyorker/patterns/tree/master/Patterns/src/org/technicalyorker/dp/behavioural/memento
 
 Strategy
-source: https://github.com/technicalyorker/source/tree/master/Patterns/src/org/technicalyorker/dp/behavioural/strategy
+source: https://github.com/technicalyorker/patterns/tree/master/Patterns/src/org/technicalyorker/dp/behavioural/strategy
 
 Template Method
-source: https://github.com/technicalyorker/source/tree/master/Patterns/src/org/technicalyorker/dp/behavioural/template
+source: https://github.com/technicalyorker/patterns/tree/master/Patterns/src/org/technicalyorker/dp/behavioural/template

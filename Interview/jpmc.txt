@@ -23,16 +23,16 @@ The solution in itself was a pursuit to attain seamlessly readable and effortles
 Additionally, the 'simply' working code base had to go through multiple revisions of improvement to its method and identifier names before it was redeemed even presentable.  
 With a fairly good test coverage of the solution, almost all public methods have been asserted while unit testing.  
 
-Source: https://github.com/technicalyorker/source/blob/master/JPMC
+Source: https://github.com/technicalyorker/misc/blob/master/JPMC
 Question:
-https://github.com/technicalyorker/source/blob/master/JPMC/resources/Test.txt
+https://github.com/technicalyorker/misc/blob/master/JPMC/resources/Test.txt
 
 PROBLEM 1
-Main Classes: https://github.com/technicalyorker/source/tree/master/JPMC/src/main/java/com/jpmc/problem1
-Test Classes: https://github.com/technicalyorker/source/tree/master/JPMC/src/test/java/com/jpmc/problem1
+Main Classes: https://github.com/technicalyorker/misc/tree/master/JPMC/src/main/java/com/jpmc/problem1
+Test Classes: https://github.com/technicalyorker/misc/tree/master/JPMC/src/test/java/com/jpmc/problem1
 
 Problem 2:
-Class diagram: https://github.com/technicalyorker/source/blob/master/JPMC/resources/problem2.png
-Main Classes: https://github.com/technicalyorker/source/tree/master/JPMC/src/main/java/com/jpmc/problem2
-Better Representation of the question: https://github.com/technicalyorker/source/blob/master/JPMC/resources/Problem2.xlsx
-Test Classes: https://github.com/technicalyorker/source/tree/master/JPMC/src/test/java/com/jpmc/problem2 
+Class diagram: https://github.com/technicalyorker/misc/blob/master/JPMC/resources/problem2.png
+Main Classes: https://github.com/technicalyorker/misc/tree/master/JPMC/src/main/java/com/jpmc/problem2
+Better Representation of the question: https://github.com/technicalyorker/misc/blob/master/JPMC/resources/Problem2.xlsx
+Test Classes: https://github.com/technicalyorker/misc/tree/master/JPMC/src/test/java/com/jpmc/problem2 
