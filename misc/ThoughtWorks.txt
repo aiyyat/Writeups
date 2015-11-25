@@ -44,4 +44,15 @@ Sales Taxes: 6.70
 Total: 74.68
 
 
-Solution: My Solution to the problem revolves round the Decorator Design pattern. The main motivation behind forming classes are to focus on nouns that constitute the problem statement. Goods which are sold in the shop is one of them. Goods are of mainly types. Goods without any tax, Good with Basic Sales Tax, Imported goods that have imposed Duty, Imported Good with Sales Tax etc are some of the possibilities described in the Use Case. Goods of these types are described by abstract classes because able to instantiate a good has no meaning in real terms. Instances of Goods must be represented by a Book Object or a CD Object etc.  
+Solution: My Solution to the problem revolves round the Decorator Design pattern. The main motivation behind forming classes/entities is to focus on nouns that constitute the problem statement. Goods sold in the shop is one of most common of them. Goods as described in the problem are of different types. Goods without any tax, Good on which Basic Sales Tax are levied, Imported goods that have imposed Duty, Imported Good with Sales Tax etc are some of the possibilities described in the Use Case. 
+Implementations of Good includes Books, Chocolates, CD etc. While a Good is (generic term in real world representation) an abstract classes and cannot be instantiated, their implementations can be.   
+Class diagram can be found in the following url:
+https://github.com/technicalyorker/misc/blob/master/ThoughtWorks/resources/Problem2.gif
+Basket is the class that is the container to all the goods. Once the goods are chosen a call to the finalizeShopping method concludes the shopping and calculates the Tax and the Total Amount payable.
+Any imported good is encapsulated inside an ImportedGood Class. This is a typical Object Wrapping and Decoration characteristic nature of Decorator Pattern.
+URL to code:
+https://github.com/technicalyorker/misc/tree/master/ThoughtWorks/src/main/java/com/thoughtworks/problem2
+URL to test cases:
+https://github.com/technicalyorker/misc/tree/master/ThoughtWorks/src/test/java/com/thoughtworks
+I do not know if thought works did expect quantity to be one of the input parameters to the Good, but including it isn't a biggie; It's just a matter of adding another member variable like Price.
+Finally, BigDecimals should be used for all calculation and Representation, including parameters to BigDecimals. A Double here would prove to be a Programmers Nightmare!!
