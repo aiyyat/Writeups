@@ -1,58 +1,55 @@
-PROBLEM TWO: SALES TAXES
- 
-Basic sales tax is applicable at a rate of 10% on all goods, except books, food, and medical products that are exempt. Import duty is an additional sales tax applicable on all imported goods at a rate of 5%, with no exemptions.
-When I purchase items I receive a receipt which lists the name of all the items and their price (including tax), finishing with the total cost of the items, and the total amounts of sales taxes paid.  The rounding rules for sales tax are that for a tax rate of n%, a shelf price of p contains (np/100 rounded up to the nearest 0.05) amount of sales tax.
-Write an application that prints out the receipt details for these shopping baskets...
-INPUT:
- 
-Input 1:
-1 book at 12.49
-1 music CD at 14.99
-1 chocolate bar at 0.85
- 
-Input 2:
-1 imported box of chocolates at 10.00
-1 imported bottle of perfume at 47.50
- 
-Input 3:
-1 imported bottle of perfume at 27.99
-1 bottle of perfume at 18.99
-1 packet of headache pills at 9.75
-1 box of imported chocolates at 11.25
- 
-OUTPUT
- 
-Output 1:
-1 book : 12.49
-1 music CD: 16.49
-1 chocolate bar: 0.85
-Sales Taxes: 1.50
-Total: 29.83
- 
-Output 2:
-1 imported box of chocolates: 10.50
-1 imported bottle of perfume: 54.65
-Sales Taxes: 7.65
-Total: 65.15
- 
-Output 3:
-1 imported bottle of perfume: 32.19
-1 bottle of perfume: 20.89
-1 packet of headache pills: 9.75
-1 imported box of chocolates: 11.85
-Sales Taxes: 6.70
-Total: 74.68
+ThoughtWorks Code Test 
+I was browsing through some good questions to try out, when I bumped into a couple of interesting problems by Thoughtworks.
 
+The ThoughtWorks Code Test Problem are quite Straight Forward to solve. It just requires a little bit of Systematic & Organized thinking patterns. In my point of view the Approach to solving the problem must be as follows:
+1) As the first step, a Problem Solver's Prime Motivation must be to identify the nouns that make up the Use Case. In the process, he is helping himself with the list of classes he would want to use to solve the problem. 
+2) He then has to try to understand the relationship between various entities, he just managed to Recognize in Step I. 
+3) Then the effort must be focused to 'Categorize' what changes, from what remains the same which pretty much makes up the third step. 
+4) Finally, an ability to co-relate it with a Design Pattern, in ordered to not have to re-invent a Solution will Save a lot of time and make it seemless to Communicate his solution with his collegues. 
 
-Solution: My Solution to the problem revolves round the Decorator Design pattern. The main motivation behind forming classes/entities is to focus on nouns that constitute the problem statement. Goods sold in the shop is one of most common of them. Goods as described in the problem are of different types. Goods without any tax, Good on which Basic Sales Tax are levied, Imported goods that have imposed Duty, Imported Good with Sales Tax etc are some of the possibilities described in the Use Case. 
-Implementations of Good includes Books, Chocolates, CD etc. While a Good is (generic term in real world representation) an abstract classes and cannot be instantiated, their implementations can be.   
-Class diagram can be found in the following url:
-https://github.com/technicalyorker/misc/blob/master/ThoughtWorks/resources/Problem2.gif
+Tips:
+1) Adhere to the Design Principles as much as possible. Refer the posting: https://technicalyorker.wordpress.com/2015/04/27/common-software-design-principles/
+2) The unit testcase should be as fine grained as possible. Mine is almost Integration in Nature, since I didn't feel it worth for the purpose of the blog.
+3) Browse through the book, "Clean Coding" by Robert C Martin. 
+
+Problem Statement:
+https://github.com/technicalyorker/misc/blob/master/ThoughtWorks/resources/questions.txt
+
+Solution to Problem 1: My Solution to the problem revolves round the State Pattern. The way I see the solution is that the Rover displays different characteristics in different (Direction Facing) States. 
+For e.g. When the Rover is North Facing, 
+	>Moving up would mean incrementing the Y co-ordinate, 
+	>Taking a left turn would mean Rover finds itself Facing West. 
+	>A Right turn from the North would translate into Rover Facing East.
+
+Class Diagram:
+https://github.com/technicalyorker/misc/blob/master/ThoughtWorks/resources/Problem1.png
+
+URL to Source Code:
+https://github.com/technicalyorker/misc/tree/master/ThoughtWorks/src/main/java/com/thoughtworks/problem1/rover
+
+URL to TestCases:
+https://github.com/technicalyorker/misc/tree/master/ThoughtWorks/src/test/java/com/thoughtworks/problem1
+  
+Solution to Problem 2: My Solution mirrors the 'Decorator Design Pattern' or 'Wrapper Pattern'. 'Goods' as described by the problem statement are of different types. 
+>Goods without any tax
+>Good on which Basic Sales Tax are levied
+>Imported goods that have imposed Duty
+>Imported Good with Sales Tax 
+are some of the possibilities described in the Use Case. 
+
+Implementations of Good include: Books, Chocolates, CD etc. 
+A Good (generic term to the items sold) is an abstract classes and cannot be instantiated, while their implementations can be.   
 Basket is the class that is the container to all the goods. Once the goods are chosen a call to the finalizeShopping method concludes the shopping and calculates the Tax and the Total Amount payable.
-Any imported good is encapsulated inside an ImportedGood Class. This is a typical Object Wrapping and Decoration characteristic nature of Decorator Pattern.
-URL to code:
+Any imported good is encapsulated inside an ImportedGood Class. This is a typical Object Wrapping or Decoration Characteristic nature of Decorator Design Pattern.
+
+Class Diagram:
+https://github.com/technicalyorker/misc/blob/master/ThoughtWorks/resources/Problem2.png
+
+URL to Source Code:
 https://github.com/technicalyorker/misc/tree/master/ThoughtWorks/src/main/java/com/thoughtworks/problem2
+
 URL to test cases:
 https://github.com/technicalyorker/misc/tree/master/ThoughtWorks/src/test/java/com/thoughtworks
-I do not know if thought works did expect quantity to be one of the input parameters to the Good, but including it isn't a biggie; It's just a matter of adding another member variable like Price.
-Finally, BigDecimals should be used for all calculation and Representation, including parameters to BigDecimals. A Double here would prove to be a Programmers Nightmare!!
+
+I do not know if the composers of the Problem had in mind, the quantity to be made a input parameters. Even so it isn't much of an effort to deal with it like we dealt the Price in the first place. 
+Final piece of Advice: BigDecimals should be used for all calculation and Representation, including parameters to BigDecimals. A Double on amount would prove to be a Programmers Nightmare!!
