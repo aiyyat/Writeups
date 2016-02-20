@@ -1,0 +1,55 @@
+ThoughtWorks Code Test 
+I was browsing through some good questions to try out, when I bumped into a couple of interesting problems by Thoughtworks.
+
+The ThoughtWorks Code Test Problem are quite Straight Forward to solve. It just requires a little bit of Systematic & Organized thinking patterns. In my point of view the Approach to solving the problem must be as follows:
+1) As the first step, a Problem Solver's Prime Motivation must be to identify the nouns that make up the Use Case. In the process, he is helping himself with the list of classes he would want to use to solve the problem. 
+2) He then has to try to understand the relationship between various entities, he just managed to Recognize in Step I. 
+3) Then the effort must be focused to 'Categorize' what changes, from what remains the same which pretty much makes up the third step. 
+4) Finally, an ability to co-relate it with a Design Pattern, in ordered to not have to re-invent a Solution will Save a lot of time and make it seemless to Communicate his solution with his collegues. 
+
+Tips:
+1) Adhere to the Design Principles as much as possible. Refer the posting: https://technicalyorker.wordpress.com/2015/04/27/common-software-design-principles/
+2) The unit testcase should be as fine grained as possible. Mine is almost Integration in Nature, since I didn't feel it worth for the purpose of the blog.
+3) Browse through the book, "Clean Coding" by Robert C Martin. 
+
+Problem Statement:
+https://github.com/technicalyorker/misc/blob/master/ThoughtWorks/resources/questions.txt
+
+Solution to Problem 1: My Solution to the problem revolves round the State Pattern. The way I see the solution is that the Rover displays different characteristics in different (Direction Facing) States. 
+For e.g. When the Rover is North Facing, 
+	>Moving up would mean incrementing the Y co-ordinate, 
+	>Taking a left turn would mean Rover finds itself Facing West. 
+	>A Right turn from the North would translate into Rover Facing East.
+
+Class Diagram:
+https://github.com/technicalyorker/misc/blob/master/ThoughtWorks/resources/Problem1.png
+
+URL to Source Code:
+https://github.com/technicalyorker/misc/tree/master/ThoughtWorks/src/main/java/com/thoughtworks/problem1/rover
+
+URL to TestCases:
+https://github.com/technicalyorker/misc/tree/master/ThoughtWorks/src/test/java/com/thoughtworks/problem1
+  
+Solution to Problem 2: My Solution mirrors the 'Decorator Design Pattern' or 'Wrapper Pattern'. 'Goods' as described by the problem statement are of different types. 
+>Goods without any tax
+>Good on which Basic Sales Tax are levied
+>Imported goods that have imposed Duty
+>Imported Good with Sales Tax 
+are some of the possibilities described in the Use Case. 
+
+Implementations of Good include: Books, Chocolates, CD etc. 
+A Good (generic term to the items sold) is an abstract classes and cannot be instantiated, while their implementations can be.   
+Basket is the class that is the container to all the goods. Once the goods are chosen a call to the finalizeShopping method concludes the shopping and calculates the Tax and the Total Amount payable.
+Any imported good is encapsulated inside an ImportedGood Class. This is a typical Object Wrapping or Decoration Characteristic nature of Decorator Design Pattern.
+
+Class Diagram:
+https://github.com/technicalyorker/misc/blob/master/ThoughtWorks/resources/Problem2.png
+
+URL to Source Code:
+https://github.com/technicalyorker/misc/tree/master/ThoughtWorks/src/main/java/com/thoughtworks/problem2
+
+URL to test cases:
+https://github.com/technicalyorker/misc/tree/master/ThoughtWorks/src/test/java/com/thoughtworks
+
+I do not know if the composers of the Problem had in mind, the quantity to be made a input parameters. Even so it isn't much of an effort to deal with it like we dealt the Price in the first place. 
+Final piece of Advice: BigDecimals should be used for all calculation and Representation, including parameters to BigDecimals. A Double on amount would prove to be a Programmers Nightmare!!

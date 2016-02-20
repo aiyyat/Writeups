@@ -47,13 +47,12 @@ Dead Lock:
 As we all know creating a dead lock is not very difficult. ;) Just be careful to not do exact copy paste of code block that does synchronization.  
 https://github.com/technicalyorker/misc/blob/master/Threads/src/com/technicalyorker/threads/Example15.java
 To ensure a dead lock never occurs just maintain the same order of synchronization in both places.
-[code language="java"]
 synchronized (a) {
 	synchronized (b) {
 		System.out.println("hi there..");
 	}
 }
-[/code]
+
 Coming soon:
 Reentrant Lock:
 
